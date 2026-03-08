@@ -8,4 +8,5 @@ urlpatterns = [
     path('<slug:slug>/', views.ProductDetailView.as_view(), name='product-detail'),
     path('admin/products/', views.AdminProductListCreateView.as_view(), name='admin-product-list'),
     path('admin/products/<int:pk>/', views.AdminProductDetailView.as_view(), name='admin-product-detail'),
+    path('admin/upload/', views.upload_image, name='upload-image'),
 ]

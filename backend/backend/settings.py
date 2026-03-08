@@ -124,3 +124,13 @@ SIMPLE_JWT = {
 
 # CORS Settings
 CORS_ALLOW_ALL_ORIGINS = True  # Dev only
+
+
+# Cloudinary Settings
+import cloudinary
+cloudinary.config(
+    cloud_name='dhkar4zmo',
+    api_key='273914248478892',
+    api_secret='_-vRKjRcUezfLmWMPIVBivM_oTs',
+    secure=True,
+)

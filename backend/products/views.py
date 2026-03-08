@@ -1,4 +1,9 @@
 from rest_framework import generics, permissions, filters
+from rest_framework.decorators import api_view, permission_classes, parser_classes
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.response import Response
+from rest_framework import status
+import cloudinary.uploader
 from .models import Category, Product
 from .serializers import (CategorySerializer, ProductListSerializer,
                           ProductDetailSerializer, ProductCreateUpdateSerializer)
@@ -57,3 +62,27 @@ class AdminProductDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductCreateUpdateSerializer
     permission_classes = [permissions.IsAdminUser]
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAdminUser])
+@parser_classes([MultiPartParser, FormParser])
+def upload_image(request):
+    """Upload an image to Cloudinary and return the URL."""
+    file = request.FILES.get('image')
+    if not file:
+        return Response({'error': 'No image file provided.'}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        folder = request.data.get('folder', 'stylevault/products')
+        result = cloudinary.uploader.upload(
+            file,
+            folder=folder,
+            resource_type='image',
+            transformation=[{'quality': 'auto', 'fetch_format': 'auto'}],
+        )
+        return Response({
+            'url': result['secure_url'],
+            'public_id': result['public_id'],
+        })
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

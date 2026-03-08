@@ -1,6 +1,83 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import API from '../api/axios';
 import './AdminDashboard.css';
+
+function ImageUploader({ imageUrl, onImageUploaded }) {
+    const [uploading, setUploading] = useState(false);
+    const [dragActive, setDragActive] = useState(false);
+    const fileRef = useRef(null);
+
+    const uploadFile = async (file) => {
+        if (!file) return;
+        setUploading(true);
+        try {
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('folder', 'stylevault/products');
+            const { data } = await API.post('/products/admin/upload/', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+            onImageUploaded(data.url);
+        } catch (err) {
+            console.error('Upload failed:', err);
+            alert('Image upload failed. Please try again.');
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        setDragActive(false);
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) uploadFile(file);
+    };
+
+    return (
+        <div className="form-group image-upload-group">
+            <label>Product Image</label>
+            <div
+                className={`image-dropzone ${dragActive ? 'drag-active' : ''} ${imageUrl ? 'has-image' : ''}`}
+                onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+                onDragLeave={() => setDragActive(false)}
+                onDrop={handleDrop}
+                onClick={() => fileRef.current?.click()}
+            >
+                {uploading ? (
+                    <div className="upload-loading">
+                        <div className="spinner"></div>
+                        <span>Uploading to Cloudinary...</span>
+                    </div>
+                ) : imageUrl ? (
+                    <div className="upload-preview">
+                        <img src={imageUrl} alt="Preview" />
+                        <div className="upload-overlay">
+                            <span>Click or drag to replace</span>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="upload-placeholder">
+                        <span className="upload-icon">📸</span>
+                        <span className="upload-text">Click or drag image here</span>
+                        <span className="upload-hint">JPG, PNG, WebP — max 10MB</span>
+                    </div>
+                )}
+            </div>
+            <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={(e) => uploadFile(e.target.files[0])}
+            />
+            {imageUrl && (
+                <button type="button" className="btn-remove-image" onClick={(e) => { e.stopPropagation(); onImageUploaded(''); }}>
+                    Remove Image
+                </button>
+            )}
+        </div>
+    );
+}
 
 function ProductManager() {
     const [products, setProducts] = useState([]);
@@ -9,7 +86,7 @@ function ProductManager() {
     const [editing, setEditing] = useState(null);
     const [form, setForm] = useState({
         name: '', slug: '', description: '', price: '', category: '', sizes: '["S","M","L","XL"]',
-        colors: '["Black","White"]', stock: 0, is_active: true,
+        colors: '["Black","White"]', stock: 0, is_active: true, image: '',
     });
 
     useEffect(() => {
@@ -38,8 +115,12 @@ function ProductManager() {
         }
         setShowForm(false);
         setEditing(null);
-        setForm({ name: '', slug: '', description: '', price: '', category: '', sizes: '["S","M","L","XL"]', colors: '["Black","White"]', stock: 0, is_active: true });
+        resetForm();
         fetchProducts();
+    };
+
+    const resetForm = () => {
+        setForm({ name: '', slug: '', description: '', price: '', category: '', sizes: '["S","M","L","XL"]', colors: '["Black","White"]', stock: 0, is_active: true, image: '' });
     };
 
     const handleEdit = (p) => {
@@ -47,7 +128,7 @@ function ProductManager() {
         setForm({
             name: p.name, slug: p.slug, description: p.description || '', price: p.price,
             category: p.category, sizes: JSON.stringify(p.sizes), colors: JSON.stringify(p.colors),
-            stock: p.stock, is_active: p.is_active,
+            stock: p.stock, is_active: p.is_active, image: p.image || '',
         });
         setShowForm(true);
     };
@@ -65,13 +146,17 @@ function ProductManager() {
         <div>
             <div className="admin-section-header">
                 <h2>Products</h2>
-                <button className="btn-primary" onClick={() => { setShowForm(!showForm); setEditing(null); }}>
+                <button className="btn-primary" onClick={() => { setShowForm(!showForm); setEditing(null); if (showForm) resetForm(); }}>
                     {showForm ? 'Cancel' : '+ Add Product'}
                 </button>
             </div>
 
             {showForm && (
                 <form onSubmit={handleSubmit} className="admin-form">
+                    <ImageUploader
+                        imageUrl={form.image}
+                        onImageUploaded={(url) => setForm({ ...form, image: url })}
+                    />
                     <div className="form-row">
                         <div className="form-group">
                             <label>Name</label>
@@ -124,11 +209,20 @@ function ProductManager() {
             <div className="admin-table-wrapper">
                 <table className="admin-table">
                     <thead>
-                        <tr><th>Name</th><th>Price</th><th>Stock</th><th>Active</th><th>Actions</th></tr>
+                        <tr><th>Image</th><th>Name</th><th>Price</th><th>Stock</th><th>Active</th><th>Actions</th></tr>
                     </thead>
                     <tbody>
                         {products.map(p => (
                             <tr key={p.id}>
+                                <td>
+                                    <div className="table-thumb">
+                                        {p.image ? (
+                                            <img src={p.image} alt={p.name} />
+                                        ) : (
+                                            <span className="no-thumb">—</span>
+                                        )}
+                                    </div>
+                                </td>
                                 <td>{p.name}</td>
                                 <td>${parseFloat(p.price).toFixed(2)}</td>
                                 <td>{p.stock}</td>
