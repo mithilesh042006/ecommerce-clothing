@@ -1,0 +1,111 @@
+.product-list-page {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.product-list-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.product-list-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.search-bar input {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 0.7rem 1.2rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9rem;
+    width: 280px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.search-bar input:focus {
+    border-color: #c084fc;
+}
+
+.search-bar input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.product-list-layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 2rem;
+}
+
+.filter-sidebar h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 1rem;
+}
+
+.category-filters {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.category-filters button {
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    padding: 0.6rem 0.8rem;
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.category-filters button:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.category-filters button.active {
+    background: rgba(192, 132, 252, 0.15);
+    color: #c084fc;
+    font-weight: 600;
+}
+
+.filter-count {
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+    .product-list-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .category-filters {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .category-filters button {
+        width: auto;
+    }
+
+    .search-bar input {
+        width: 100%;
+    }
+}
