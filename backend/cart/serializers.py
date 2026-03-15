@@ -26,8 +26,8 @@ class CartSerializer(serializers.ModelSerializer):
 class AddToCartSerializer(serializers.Serializer):
     product_id = serializers.IntegerField()
     quantity = serializers.IntegerField(default=1, min_value=1)
-    size = serializers.CharField(max_length=20, required=False, default='')
-    color = serializers.CharField(max_length=30, required=False, default='')
+    size = serializers.CharField(max_length=20, required=False, default='', allow_blank=True)
+    color = serializers.CharField(max_length=30, required=False, default='', allow_blank=True)
 
 
 class UpdateCartItemSerializer(serializers.Serializer):

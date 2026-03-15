@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useSnackbar } from '../components/Snackbar';
 import API from '../api/axios';
 import './Checkout.css';
 
 export default function Checkout() {
     const { cart, fetchCart } = useCart();
     const navigate = useNavigate();
+    const { showSnackbar } = useSnackbar();
     const [form, setForm] = useState({
         shipping_address: '', city: '', state: '', zip_code: '', phone: '',
     });
@@ -22,6 +24,7 @@ export default function Checkout() {
         try {
             const { data } = await API.post('/orders/create/', form);
             await fetchCart();
+            showSnackbar('🎉 Order placed successfully! Thank you for shopping with us.');
             navigate(`/orders/${data.id}`, { state: { justOrdered: true } });
         } catch (err) {
             setError(err.response?.data?.error || 'Failed to place order. Please try again.');

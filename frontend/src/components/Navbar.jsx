@@ -22,15 +22,17 @@ export default function Navbar() {
                 </Link>
 
                 <div className="navbar-links">
-                    <Link to="/products" className="nav-link">Shop</Link>
+                    {!isAdmin && <Link to="/products" className="nav-link">Shop</Link>}
                     {isAuthenticated ? (
                         <>
-                            <Link to="/orders" className="nav-link">My Orders</Link>
+                            {!isAdmin && <Link to="/orders" className="nav-link">My Orders</Link>}
                             {isAdmin && <Link to="/admin" className="nav-link nav-admin">Dashboard</Link>}
-                            <Link to="/cart" className="nav-link cart-link">
-                                🛒
-                                {cart.total_items > 0 && <span className="cart-badge">{cart.total_items}</span>}
-                            </Link>
+                            {!isAdmin && (
+                                <Link to="/cart" className="nav-link cart-link">
+                                    🛒
+                                    {cart.total_items > 0 && <span className="cart-badge">{cart.total_items}</span>}
+                                </Link>
+                            )}
                             <div className="nav-user">
                                 <span className="user-greeting">Hi, {user?.first_name || user?.username}</span>
                                 <button onClick={handleLogout} className="btn-logout">Logout</button>
@@ -47,3 +49,4 @@ export default function Navbar() {
         </nav>
     );
 }
+

@@ -15,3 +15,13 @@ export function AdminRoute({ children }) {
     if (!isAdmin) return <Navigate to="/" replace />;
     return children;
 }
+
+// Forces admin users to stay on /admin — redirects them back if they navigate away
+export function AdminLock({ children }) {
+    const { isAuthenticated, isAdmin } = useAuth();
+    const location = useLocation();
+    if (isAuthenticated && isAdmin && location.pathname !== '/admin') {
+        return <Navigate to="/admin" replace />;
+    }
+    return children;
+}
